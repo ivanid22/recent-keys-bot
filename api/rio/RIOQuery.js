@@ -21,7 +21,6 @@ const findCharacterRecentRuns = async (name, realm, region) => {
             })).sort((a, b) => b.completedAt - a.completedAt)
         }
     } catch(e) {
-        console.log(e)
         return {
           status: 'ERROR',
           message: e.response.data ? e.response.data.message : e.message

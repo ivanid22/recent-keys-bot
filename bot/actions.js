@@ -7,7 +7,7 @@ const BOT_COMMANDS = {
 
 formatRuns = (runs) => {
   return runs.reduce((previous, current) => (
-    previous + `${current.dungeon}:\nTimestamp: ${current.completedAt.toString()}\nLevel:${current.mythicLevel}\nTimed:${current.timed ? 'Yes\n' : 'No\n'}\n`
+    previous + `${current.dungeon}:\nTimestamp: ${current.completedAt.toString()}\nLevel: ${current.mythicLevel}\nTimed: ${current.timed ? 'Yes\n' : 'No\n'}\n`
   ), '');
 }
 
@@ -19,8 +19,8 @@ const findRuns = async (message) => {
   }
 
   const runsData = await RIOActions.findCharacterRecentRuns(params[1], params[2], params[3]);
-
-  if (runsData.status = 'OK') {
+  console.log(runsData)
+  if (runsData.status === 'OK') {
     message.reply(formatRuns(runsData.runs));
   } else {
     message.reply('Error on data request: ' + runsData.message);

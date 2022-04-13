@@ -7,9 +7,12 @@ const client = new Discord.Client({ intents: [Intents.FLAGS.DIRECT_MESSAGES, Int
 
 client.on('messageCreate', parseMessage);
 
+client.on('messageCreate', (message) => {
+    console.log(message.guildId);
+})
+
 client.on('ready', () => {
     console.log(`Bot ready as ${client.user.tag}`);
 });
 
 module.exports = client;
-
