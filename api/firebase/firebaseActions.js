@@ -2,7 +2,7 @@ const firebase = require('./setup');
 
 const isCharacterOnList = async (guild, list, character) => {
   try {
-    const chr = await firebase.doc(`guilds/${guild}/${list}/${character}`).get();
+    const chr = await firebase.doc(`guilds/${guild}/${list}/${character.name}`).get();
     if (chr.exists) {
       return true;
     }
@@ -14,6 +14,13 @@ const isCharacterOnList = async (guild, list, character) => {
 
 const addCharacterToList = async (guild, list, character) => {
   try {
+    if (await isCharacterOnList(guild, list, character)) {
+      return {
+        status: 'ok',
+        message: 'character already on list'
+      }
+    };
+
     await firebase.doc(`guilds/${guild}/${list}/${character.name}`).set({
       character
     });

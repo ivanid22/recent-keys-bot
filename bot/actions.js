@@ -1,8 +1,9 @@
-const { json } = require('express/lib/response');
 const RIOActions = require('../api/rio/RIOQuery');
+const FirebaseActions = require('../api/firebase/firebaseActions');
 
 const BOT_COMMANDS = {
-    FIND_RUNS: '!find'
+  FIND_RUNS: '!find',
+  ADD_CHARACTER_TO_LIST: '!listadd'
 }
 
 formatRuns = (runs) => {
@@ -14,7 +15,7 @@ formatRuns = (runs) => {
 const findRuns = async (message) => {
   const params = message.content.split(' ').filter(element => element != '');
   if (params.length != 4) {
-    message.reply(`Wrong number of parameters (received ${params.length - 1}, expected 3`);
+    message.reply(`Wrong number of parameters (received ${params.length - 1}, expected 3)`);
     return;
   }
 
@@ -27,6 +28,27 @@ const findRuns = async (message) => {
   };
 }
 
+const addCharacterToList = async (message) => {
+  const params = message.content.split(' ').filter(element => element != '');
+  if (params.length != 5) {
+    message.reply(`Wrong number of parameters (received ${params.length - 1}, expected 4)`)
+    return;
+  }
+
+  if (! await RIOActions.characterExists(params[2], params[3], params[4])) {
+    message.reply('Character does not exist');
+    return;
+  }
+
+  await FirebaseActions.addCharacterToList(message.guildId, params[1], {
+    name: params[2],
+    realm: params[3],
+    region: params[4]
+  });
+  
+  message.reply('Character added to list!');
+}
+
 const parseMessage = (message) => {
     const params = message.content.split(' ');
     if (params[0][0] != '!') return;
@@ -34,6 +56,9 @@ const parseMessage = (message) => {
     switch (params[0]) {
       case BOT_COMMANDS.FIND_RUNS:
         findRuns(message);
+        break;
+      case BOT_COMMANDS.ADD_CHARACTER_TO_LIST:
+        addCharacterToList(message);
         break;
       default:
         message.reply('Unrecognized command');
