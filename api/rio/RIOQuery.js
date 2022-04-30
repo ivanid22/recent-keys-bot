@@ -44,6 +44,8 @@ const characterExists = async (name, realm, region) => {
     }
 }
 
+
+
 //findCharacterRecentRuns('nonexistant123', 'kelthuzad', 'us').then(res => console.log(res));
 
 module.exports = {

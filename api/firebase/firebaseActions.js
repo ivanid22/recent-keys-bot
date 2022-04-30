@@ -1,5 +1,3 @@
-const { firestore } = require('firebase-admin');
-const { CollectionReference } = require('firebase-admin/firestore');
 const firebase = require('./setup');
 
 const isCharacterOnList = async (guild, list, character) => {
@@ -61,6 +59,8 @@ const getCharacters = async (guild, list) => {
     };
   };
 };
+
+
 
 const findLists = async (guild) => {
   try {

@@ -1,5 +1,6 @@
 const RIOActions = require('../api/rio/RIOQuery');
 const FirebaseActions = require('../api/firebase/firebaseActions');
+const moment = require('moment');
 
 const BOT_COMMANDS = {
   FIND_RUNS: '!find',
@@ -9,7 +10,7 @@ const BOT_COMMANDS = {
 
 formatRuns = (runs) => {
   return runs.reduce((previous, current) => (
-    previous + `${current.dungeon}:\nTimestamp: ${current.completedAt.toString()}\nLevel: ${current.mythicLevel}\nTimed: ${current.timed ? 'Yes\n' : 'No\n'}\n`
+    previous + `${current.dungeon}:\nTimestamp: ${moment(current.completedAt).format('MM/DD/YYYY HH:MI:SS')}\nLevel: ${current.mythicLevel}\nTimed: ${current.timed ? 'Yes\n' : 'No\n'}\n`
   ), '');
 }
 
@@ -21,7 +22,6 @@ const findRuns = async (message) => {
   }
 
   const runsData = await RIOActions.findCharacterRecentRuns(params[1], params[2], params[3]);
-  console.log(runsData)
   if (runsData.status === 'OK') {
     message.reply(formatRuns(runsData.runs));
   } else {
