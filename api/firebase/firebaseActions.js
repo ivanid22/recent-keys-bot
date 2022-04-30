@@ -60,8 +60,13 @@ const getCharacters = async (guild, list) => {
   };
 };
 
+const listExists = async (guild, list) => {
+  return ((await firebase.collection(`guilds/${guild}/${list}`).listDocuments()).length > 0)
+}
+
 module.exports = {
   isCharacterOnList,
   addCharacterToList,
-  getCharacters
+  getCharacters,
+  listExists
 };

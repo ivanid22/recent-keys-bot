@@ -3,7 +3,8 @@ const FirebaseActions = require('../api/firebase/firebaseActions');
 
 const BOT_COMMANDS = {
   FIND_RUNS: '!find',
-  ADD_CHARACTER_TO_LIST: '!listadd'
+  ADD_CHARACTER_TO_LIST: '!listadd',
+  FIND_LIST_RUNS: '!listfind'
 }
 
 formatRuns = (runs) => {
@@ -49,20 +50,46 @@ const addCharacterToList = async (message) => {
   message.reply('Character added to list!');
 }
 
-const parseMessage = (message) => {
-    const params = message.content.split(' ');
-    if (params[0][0] != '!') return;
+const findRunsForList = async (message) => {
+  const params = message.content.split(' ').filter(element => element != '');
 
-    switch (params[0]) {
-      case BOT_COMMANDS.FIND_RUNS:
-        findRuns(message);
-        break;
-      case BOT_COMMANDS.ADD_CHARACTER_TO_LIST:
-        addCharacterToList(message);
-        break;
-      default:
-        message.reply('Unrecognized command');
-    };
+  if (! await FirebaseActions.listExists(message.guildId, params[1])) {
+    message.reply(`List ${params[1]} does not exist`);
+    return;
+  }
+
+  const characters = await FirebaseActions.getCharacters(message.guildId, params[1]);
+  console.log(characters)
+  let runsOutput = ' ';
+
+  for (chr of characters.characters) {
+    const { name, realm, region } = chr.character;
+    console.log(`${name} ${realm} ${region}`)
+    const runsData = await RIOActions.findCharacterRecentRuns(name, realm, region);
+    runsOutput += `Character: ${name}, realm: ${realm}\n` + (runsData.runs.length > 0 ? formatRuns(runsData.runs) : 'No recent runs for this character\n') + '\n';
+    console.log(runsData)
+  };
+
+  message.reply(runsOutput);
+}
+
+const parseMessage = (message) => {
+  const params = message.content.split(' ');
+  if (params[0][0] != '!') return;
+
+  switch (params[0]) {
+    case BOT_COMMANDS.FIND_RUNS:
+      findRuns(message);
+      break;
+    case BOT_COMMANDS.ADD_CHARACTER_TO_LIST:
+      addCharacterToList(message);
+      break;
+    case BOT_COMMANDS.FIND_LIST_RUNS:
+      findRunsForList(message);
+      break;
+    default:
+      message.reply('Unrecognized command');
+  };
 }
 
 module.exports = {

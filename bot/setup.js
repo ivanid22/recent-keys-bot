@@ -8,6 +8,7 @@ const client = new Discord.Client({ intents: [Intents.FLAGS.DIRECT_MESSAGES, Int
 client.on('messageCreate', parseMessage);
 
 client.on('messageCreate', (message) => {
+    console.log(message.content)
     console.log(message.guildId);
 })
 
