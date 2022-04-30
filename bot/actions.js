@@ -3,7 +3,7 @@ const FirebaseActions = require('../api/firebase/firebaseActions');
 
 const BOT_COMMANDS = {
   FIND_RUNS: '!find',
-  ADD_CHARACTER_TO_LIST: '!listadd',
+  ADD_CHARACTER_TO_LIST: '!listaddcharacter',
   FIND_LIST_RUNS: '!listfind'
 }
 

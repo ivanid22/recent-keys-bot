@@ -1,3 +1,5 @@
+const { firestore } = require('firebase-admin');
+const { CollectionReference } = require('firebase-admin/firestore');
 const firebase = require('./setup');
 
 const isCharacterOnList = async (guild, list, character) => {
@@ -60,6 +62,16 @@ const getCharacters = async (guild, list) => {
   };
 };
 
+const findLists = async (guild) => {
+  try {
+    const lists = await firebase.doc(`guilds/${guild}`).listCollections();
+    return lists.map(list => list.id);
+  } 
+  catch (e) {
+    console.log(e.message)
+  }
+};
+
 const listExists = async (guild, list) => {
   return ((await firebase.collection(`guilds/${guild}/${list}`).listDocuments()).length > 0)
 }
@@ -68,5 +80,7 @@ module.exports = {
   isCharacterOnList,
   addCharacterToList,
   getCharacters,
-  listExists
+  listExists,
+  findLists
 };
+
