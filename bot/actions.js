@@ -1,12 +1,14 @@
 const RIOActions = require('../api/rio/RIOQuery');
 const FirebaseActions = require('../api/firebase/firebaseActions');
+const { whoNeedsAKey } = require('../api/actions');
 const moment = require('moment');
 
 const BOT_COMMANDS = {
   FIND_RUNS: '!find',
   ADD_CHARACTER_TO_LIST: '!listaddcharacter',
-  FIND_LIST_RUNS: '!listfind'
-}
+  FIND_LIST_RUNS: '!listfind',
+  WHO_NEEDS_A_KEY: '!whoneedsakey'
+};
 
 formatRuns = (runs) => {
   return runs.reduce((previous, current) => (
@@ -29,6 +31,20 @@ const findRuns = async (message) => {
   };
 }
 
+const dispatchWhoNeedsAKey = async (message) => {
+  const params = message.content.split(' ').filter(element => element != '');
+  if (params.length != 2) {
+    message.reply(`Wrong number of parameters (received ${params.length - 1}, expected 1)`);  
+    return;
+  }
+  try {
+    const report = await whoNeedsAKey(message.guildId, parseInt(params[1]));
+    message.reply(formatWhoNeedsAKeyReport(report));
+  } catch(e) {
+    console.log(`ERROR - dispatchWhoNeedsAKey: ${e.message}`);
+  }
+}
+
 const addCharacterToList = async (message) => {
   const params = message.content.split(' ').filter(element => element != '');
   if (params.length != 5) {
@@ -48,6 +64,18 @@ const addCharacterToList = async (message) => {
   });
   
   message.reply('Character added to list!');
+}
+
+const formatWhoNeedsAKeyReport = (report) => {
+  let formattedReport = '';
+  report.forEach((page) => {
+    formattedReport += `${page.list}'s characters that haven't completed at least one key at the requested level:\n`;
+    page.characters.forEach(character => {
+      formattedReport += `${character.name}, ${character.realm}, ${character.region}\n`;
+    });
+    formattedReport += page.characters.length === 0 ? `all of ${page.list}'s characters have completed a key this week!\n` : '';
+  });
+  return report.length === 0 ? `No lists have been added on this server\n` : formattedReport
 }
 
 const findRunsForList = async (message) => {
@@ -85,6 +113,9 @@ const parseMessage = (message) => {
       break;
     case BOT_COMMANDS.FIND_LIST_RUNS:
       findRunsForList(message);
+      break;
+    case BOT_COMMANDS.WHO_NEEDS_A_KEY:
+      dispatchWhoNeedsAKey(message);
       break;
     default:
       message.reply('Unrecognized command');
