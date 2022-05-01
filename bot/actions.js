@@ -59,7 +59,6 @@ const findRunsForList = async (message) => {
   }
 
   const characters = await FirebaseActions.getCharacters(message.guildId, params[1]);
-  console.log(characters)
   let runsOutput = ' ';
 
   for (chr of characters.characters) {
