@@ -1,4 +1,7 @@
 {
+  "engines": {
+    "node": "16.x"
+  },
   "name": "recent-keys-bot",
   "version": "1.0.0",
   "description": "",
