@@ -28,12 +28,21 @@ const charactersMissingWeeklyRun = async (guild, list, minKeyLevel) => {
   }
 }
 
-const whoNeedsAKey = async (guild) => {
+const whoNeedsAKey = async (guild, minKeyLevel) => {
+  const listReport = []
   try {
     const lists = await findLists(guild);
-
+    for (list of lists) {
+      const charactersMissingRun = await charactersMissingWeeklyRun(guild, list, minKeyLevel);
+      listReport.push({
+        list,
+        characters: charactersMissingRun
+      });
+    };
+    return listReport;
   } catch(e) {
     console.log(`ERROR - whoNeedsAKey: ${e.message}`);
   }
 };
 
+whoNeedsAKey('962465647038722068', 15).then(lists => lists.forEach(list => console.log(list)));
