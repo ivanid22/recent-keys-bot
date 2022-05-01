@@ -4,13 +4,9 @@ const serviceAccount = require("../../secrets/firebase-auth.json");
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  databaseURL: "https://recent-keys-default-rtdb.firebaseio.com"
+  databaseURL: process.env.FIREBASE_ENDPOINT_URL
 });
 
 const firestore = fs.getFirestore();
-
-firestore.doc('servers/us').listCollections().then(cols => {
-  cols.forEach(col => console.log(col.id))
-})
 
 module.exports = firestore;
