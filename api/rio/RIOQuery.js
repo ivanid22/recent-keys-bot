@@ -17,7 +17,8 @@ const findCharacterRecentRuns = async (name, realm, region) => {
                 dungeon: run.dungeon,
                 mythicLevel: run.mythic_level,
                 timed: (run.num_keystone_upgrades > 0),
-                completedAt: new Date(run.completed_at)
+                completedAt: new Date(run.completed_at),
+                url: run.url
             })).sort((a, b) => b.completedAt - a.completedAt)
         }
     } catch(e) {

@@ -1,6 +1,7 @@
 const RIOActions = require('../api/rio/RIOQuery');
 const FirebaseActions = require('../api/firebase/firebaseActions');
 const { whoNeedsAKey, findRunsWithinWeek } = require('../api/actions');
+const { MessageEmbed } = require('discord.js');
 const moment = require('moment');
 
 const BOT_COMMANDS = {
@@ -11,7 +12,26 @@ const BOT_COMMANDS = {
   FIND_CHARACTER_RECENT_RUNS: '!findrunsthisweek'
 };
 
-formatRuns = (runs) => {
+const formatRunsEmbed = (runs, character) => { 
+  console.log(runs)
+  const { name, realm } = character;
+  const response = new MessageEmbed();
+  response.setColor('#0099ff')
+          .setTitle(`${name} - ${realm}`)
+          .setDescription('Recent Mythic+ runs')
+          .addFields(
+            runs.map(run => ({
+              name: `${run.dungeon} +${run.mythicLevel}`,
+              value: `${moment(run.completedAt).format('MM/DD/YYYY HH:MI:SS')} \n ${run.timed ? 'Timed' : 'Not timed'}`,
+              url: run.url,
+              inline: true
+            }))
+          )
+          .setTimestamp();
+  return response;
+}
+
+const formatRuns = (runs) => {
   return runs.reduce((previous, current) => (
     previous + `${current.dungeon}:\nTimestamp: ${moment(current.completedAt).format('MM/DD/YYYY HH:MI:SS')}\nLevel: ${current.mythicLevel}\nTimed: ${current.timed ? 'Yes\n' : 'No\n'}\n`
   ), '');
@@ -26,7 +46,12 @@ const findRuns = async (message) => {
 
   const runsData = await RIOActions.findCharacterRecentRuns(params[1], params[2], params[3]);
   if (runsData.status === 'OK') {
-    message.reply(formatRuns(runsData.runs));
+    message.reply({
+      content: 'Recent runs:',
+      embeds: [
+        formatRunsEmbed(runsData.runs, { name: params[1], realm: params[2] })
+      ]
+    });
   } else {
     message.reply('Error on data request: ' + runsData.message);
   };
