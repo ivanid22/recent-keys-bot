@@ -65,9 +65,13 @@ const dispatchWhoNeedsAKey = async (message) => {
   }
   try {
     const report = await whoNeedsAKey(message.guildId, parseInt(params[1]));
-    message.reply(formatWhoNeedsAKeyReport(report));
+    console.log(formatWhoNeedsAKeyEmbed(report))
+    message.reply({
+      content: `Characters missing a run >= ${params[1]} this week`,
+      embeds: [formatWhoNeedsAKeyEmbed(report)]
+    });
   } catch(e) {
-    console.log(`ERROR - dispatchWhoNeedsAKey: ${e.message}`);
+    console.log(`ERROR - dispatchWhoNeedsAKey: ${e}`);
   }
 }
 
@@ -117,6 +121,21 @@ const formatWhoNeedsAKeyReport = (report) => {
     formattedReport += page.characters.length === 0 ? `all of ${page.list}'s characters have completed a key this week!\n` : '';
   });
   return report.length === 0 ? `No lists have been added on this server\n` : formattedReport
+}
+
+const formatWhoNeedsAKeyEmbed = (report) => {
+  const response = new MessageEmbed();
+  response.setTitle('Characters missing runs this week')
+          .setDescription(`For lists registered on this discord server`);
+  report.forEach(page => {
+    const characterNames = page.characters.map(character => character.name);
+    response.addField(`${page.list}'s characters`,
+      characterNames.length > 0 ? characterNames.reduce((previous, current) => `${previous}\n${current}`) : `No characters missing their run`,
+      true
+    );
+  });
+
+  return response;
 }
 
 const findRunsForList = async (message) => {
