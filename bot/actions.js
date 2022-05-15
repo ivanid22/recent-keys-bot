@@ -6,14 +6,15 @@ const moment = require('moment');
 
 const BOT_COMMANDS = {
   FIND_RUNS: '!find',
+  HELP: '!help',
   ADD_CHARACTER_TO_LIST: '!listaddcharacter',
+  REMOVE_CHARACTER_FROM_LIST: '!listremovecharacter',
   FIND_LIST_RUNS: '!listfind',
   WHO_NEEDS_A_KEY: '!whoneedsakey',
   FIND_CHARACTER_RECENT_RUNS: '!findrunsthisweek'
 };
 
 const formatRunsEmbed = (runs, character) => { 
-  console.log(runs)
   const { name, realm } = character;
   const response = new MessageEmbed();
   response.setColor('#0099ff')
@@ -111,18 +112,6 @@ const addCharacterToList = async (message) => {
   message.reply('Character added to list!');
 }
 
-const formatWhoNeedsAKeyReport = (report) => {
-  let formattedReport = '';
-  report.forEach((page) => {
-    formattedReport += `${page.list}'s characters that haven't completed at least one key at the requested level:\n`;
-    page.characters.forEach(character => {
-      formattedReport += `${character.name}, ${character.realm}, ${character.region}\n`;
-    });
-    formattedReport += page.characters.length === 0 ? `all of ${page.list}'s characters have completed a key this week!\n` : '';
-  });
-  return report.length === 0 ? `No lists have been added on this server\n` : formattedReport
-}
-
 const formatWhoNeedsAKeyEmbed = (report) => {
   const response = new MessageEmbed();
   response.setTitle('Characters missing runs this week')
@@ -160,6 +149,58 @@ const findRunsForList = async (message) => {
   message.reply(runsOutput);
 }
 
+const dispatchRemoveCharacterFromList = async (message) => {
+  const params = message.content.split(' ').filter(element => element != '');
+  if (params.length != 3) {
+    message.reply(`Error: expected 2 parameters, received ${params.length - 1}`);
+    return;
+  };
+
+  const result = await FirebaseActions.removeCharacterFromList(message.guildId, params[1], params[2]);
+  message.reply(result.status === 'ERROR' ? result.message : 'Character removed from list!');
+}
+
+const displayHelp = async (message) => {
+  const replyEmbed = new MessageEmbed();
+  replyEmbed.setTitle('recent-keys-bot help')
+            .setDescription('available commands')
+            .addFields([
+              {
+                name: '!find [character] [realm] [region]',
+                value: 'finds the 10 most recent runs for a character'
+              },
+              {
+                name: '!findrunsthisweek [character] [realm] [region]',
+                value: 'finds the 10 most recent runs for a character that happened within the current week'
+              },
+              {
+                name: '!listaddcharacter [list] [character] [realm] [region]',
+                value: 'adds a character to a list. if the list doesn\'t exist, it will be created'
+              },
+              {
+                name: '!listremovecharacter [list] [character] [realm] [region]',
+                value: 'removes a character from a list'
+              },
+              {
+                name: '!listfind [list]',
+                value: 'finds recent runs for all characters on a list'
+              },
+              {
+                name: '!listremovecharacter [list] [character] [realm] [region]',
+                value: 'removes a character from a list'
+              },
+              {
+                name: '!whoneedsakey [level]',
+                value: 'finds all characters on all lists that haven\'t completed a run at the specified level whithin the current week'
+              }
+            ]);
+
+  message.reply({
+    content: 'Available commands',
+    embeds: [replyEmbed]
+  });
+}
+
 const parseMessage = (message) => {
   const params = message.content.split(' ');
   if (params[0][0] != '!') return;
@@ -179,6 +220,12 @@ const parseMessage = (message) => {
       break;
     case BOT_COMMANDS.FIND_CHARACTER_RECENT_RUNS:
       dispatchFindRunsThisWeek(message);
+      break;
+    case BOT_COMMANDS.REMOVE_CHARACTER_FROM_LIST:
+      dispatchRemoveCharacterFromList(message);
+      break;
+    case BOT_COMMANDS.HELP:
+      displayHelp(message);
       break;
     default:
       message.reply('Unrecognized command');

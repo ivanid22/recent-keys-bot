@@ -17,7 +17,7 @@ const charactersMissingWeeklyRun = async (guild, list, minKeyLevel) => {
   let charactersMissingKey = [];
   try {
     const characters = await (await getCharacters(guild, list)).characters;
-    for (character of characters) {
+    for (const character of characters) {
       const characterRunsThisWeek = await findRunsWithinWeek(character.character.name, character.character.realm, character.character.region);
       const runsOverLevel = characterRunsThisWeek.filter(run => run.mythicLevel >= minKeyLevel);
       charactersMissingKey = runsOverLevel.length === 0 ? [...charactersMissingKey, character.character] : charactersMissingKey;

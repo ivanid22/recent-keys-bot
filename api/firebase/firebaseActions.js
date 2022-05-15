@@ -12,6 +12,21 @@ const isCharacterOnList = async (guild, list, character) => {
   }
 };
 
+const removeCharacterFromList = async (guild, list, character) => {
+  try {
+    if(! await isCharacterOnList(guild, list, { name: character })) {
+      return {
+        status: 'ERROR',
+        message: 'Character is not on the list'
+      };
+    };
+
+    return firebase.doc(`guilds/${guild}/${list}/${character}`).delete();
+  } catch (e) {
+    console.log('ERROR - removeCharacterFromList: ' + e.message);
+  }
+}
+
 const addCharacterToList = async (guild, list, character) => {
   try {
     if (await isCharacterOnList(guild, list, character)) {
@@ -81,6 +96,7 @@ module.exports = {
   addCharacterToList,
   getCharacters,
   listExists,
-  findLists
+  findLists,
+  removeCharacterFromList
 };
 
