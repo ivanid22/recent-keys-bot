@@ -1,3 +1,4 @@
+const e = require('express');
 const firebase = require('./setup');
 
 const isCharacterOnList = async (guild, list, character) => {
@@ -10,6 +11,22 @@ const isCharacterOnList = async (guild, list, character) => {
   } catch(e) {
     return false; 
   }
+};
+
+const removeList = async (guild, list) => {
+  try {
+    const docs = await firebase.collection(`guilds/${guild}/${list}`).listDocuments();
+
+    for (let document of docs) {
+      await document.delete();
+    };
+
+    return true;
+
+  } catch (e) {
+    console.log('Error - removeList: ' + e.message);
+    return false;
+  };
 };
 
 const removeCharacterFromList = async (guild, list, character) => {
@@ -97,6 +114,6 @@ module.exports = {
   getCharacters,
   listExists,
   findLists,
-  removeCharacterFromList
+  removeCharacterFromList,
+  removeList
 };
-

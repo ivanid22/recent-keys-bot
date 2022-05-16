@@ -11,7 +11,8 @@ const BOT_COMMANDS = {
   REMOVE_CHARACTER_FROM_LIST: '!listremovecharacter',
   FIND_LIST_RUNS: '!listfind',
   WHO_NEEDS_A_KEY: '!whoneedsakey',
-  FIND_CHARACTER_RECENT_RUNS: '!findrunsthisweek'
+  FIND_CHARACTER_RECENT_RUNS: '!findrunsthisweek',
+  REMOVE_LIST: '!listremove'
 };
 
 const formatRunsEmbed = (runs, character) => { 
@@ -201,6 +202,17 @@ const displayHelp = async (message) => {
   });
 }
 
+const dispatchRemoveList = async (message) => {
+  const params = message.content.split(' ').filter(element => element != '');
+  if (params.length != 2) {
+    message.reply(`Error: expected 1 parameter, received ${params.length - 1}`);
+    return;
+  };
+
+  const result = await FirebaseActions.removeList(message.guildId, params[1]);
+  message.reply(result ? 'List removed!' : 'Error removing list');
+}
+
 const parseMessage = (message) => {
   const params = message.content.split(' ');
   if (params[0][0] != '!') return;
@@ -226,6 +238,9 @@ const parseMessage = (message) => {
       break;
     case BOT_COMMANDS.HELP:
       displayHelp(message);
+      break;
+    case BOT_COMMANDS.REMOVE_LIST:
+      dispatchRemoveList(message);
       break;
     default:
       message.reply('Unrecognized command');
